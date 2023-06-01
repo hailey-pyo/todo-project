@@ -3,6 +3,9 @@
     "target": "esnext",
     "module": "esnext",
     "strict": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "allowJs": true,
     "jsx": "preserve",
     "moduleResolution": "node",
     "skipLibCheck": true,
@@ -25,7 +28,8 @@
       "dom",
       "dom.iterable",
       "scripthost"
-    ]
+    ],
+    "typeRoots": ["./node_modules/@type", "types"],
   },
   "include": [
     "src/**/*.ts",
@@ -36,5 +40,5 @@
   ],
   "exclude": [
     "node_modules"
-  ]
+  ],
 }
