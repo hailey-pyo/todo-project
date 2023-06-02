@@ -123,10 +123,8 @@ export default (
       this.$emit("remove", this.index);
     },
     mouseDown(e: MouseEvent) {
-      this.originY = e.clientY;
-      console.log("============originY셋팅==========" + this.originY);
-
-      const originTop = this.$refs.oneItem.offsetTop;
+      this.originY = window.pageYOffset + e.clientY;
+      console.log("============1111originY셋팅==========" + this.originY);
 
       this.isDragging = true;
       this.$emit("readyYdata");
@@ -136,11 +134,11 @@ export default (
         throttle((e: MouseEvent) => {
           if (this.isDragging) {
             if (this.changeStatus.status) {
-              console.log("e.clientY: " + e.clientY);
+              console.log("e.절대값: " + window.pageYOffset + e.clientY);
 
               this.$refs.oneItem.style.transform = "translateY(0px)";
 
-              this.originY = e.clientY;
+              this.originY = window.pageYOffset + e.clientY;
               console.log("순서변경 완료 originY변경! " + this.originY);
               this.$emit("resetChangeStatus", false);
             } else {
@@ -157,10 +155,12 @@ export default (
               //322로 돌아와야하는뎅
               //331 296 만약 바뀌면 transform 0 & 현재 originY = e.clientY
               const dy =
-                e.clientY <= this.changeStatus.firstYdata - 50 ||
-                e.clientY >= this.changeStatus.lastYdata + 50
+                window.pageYOffset + e.clientY <=
+                  this.changeStatus.firstYdata - 50 ||
+                window.pageYOffset + e.clientY >=
+                  this.changeStatus.lastYdata + 50
                   ? 0
-                  : e.clientY - this.originY;
+                  : window.pageYOffset + e.clientY - this.originY;
               // console.log(e.clientY <= this.changeStatus.firstYdata - 50);
               // console.log(e.clientY >= this.changeStatus.lastYdata + 50);
               // console.log("dy: " + dy);
@@ -168,7 +168,12 @@ export default (
               //원래위치 + e.clientY - originY
               this.$refs.oneItem.style.transform =
                 "translateY(" + dy / 7 + "px)";
-              this.$emit("changeOrder", this.todoItem, e.clientY, this.index);
+              this.$emit(
+                "changeOrder",
+                this.todoItem,
+                window.pageYOffset + e.clientY,
+                this.index,
+              );
             }
           }
         }, 100),
@@ -189,8 +194,10 @@ export default (
         { once: true },
       );
     },
-    touchStart(e: Touch) {
-      this.originY = e.clientY;
+    touchStart(e: TouchEvent) {
+      e.preventDefault();
+      this.originY =
+        window.pageYOffset + Math.round(e.targetTouches[0].clientY);
       console.log("============originY셋팅==========" + this.originY);
 
       this.isDragging = true;
@@ -203,21 +210,31 @@ export default (
             if (this.changeStatus.status) {
               this.$refs.oneItem.style.transform = "translateY(0px)";
 
-              this.originY = e.clientY;
+              this.originY =
+                window.pageYOffset + Math.round(e.targetTouches[0].clientY);
               console.log("순서변경 완료 originY변경! " + this.originY);
               this.$emit("resetChangeStatus", false);
             } else {
               this.$refs.oneItem.style.boxShadow = "1px 1px 10px rgb(2,2,2)";
 
               const dy =
-                e.clientY <= this.changeStatus.firstYdata - 50 ||
-                e.clientY >= this.changeStatus.lastYdata + 50
+                window.pageYOffset + Math.round(e.targetTouches[0].clientY) <=
+                  this.changeStatus.firstYdata - 50 ||
+                window.pageYOffset + Math.round(e.targetTouches[0].clientY) >=
+                  this.changeStatus.lastYdata + 50
                   ? 0
-                  : e.clientY - this.originY;
+                  : window.pageYOffset +
+                    Math.round(e.targetTouches[0].clientY) -
+                    this.originY;
 
               this.$refs.oneItem.style.transform =
                 "translateY(" + dy / 7 + "px)";
-              this.$emit("changeOrder", this.todoItem, e.clientY, this.index);
+              this.$emit(
+                "changeOrder",
+                this.todoItem,
+                window.pageYOffset + Math.round(e.targetTouches[0].clientY),
+                this.index,
+              );
             }
           }
         }, 100),
