@@ -5,7 +5,7 @@
     </div>
     <!-- :ref="'editInput' + index" -->
     <span v-if="!edit.status" class="item stop-dragging">
-      <span class="title" @click="editTodo">
+      <span class="title" @click="editTodo" ref="originTitle">
         {{ todoItem.title }}
       </span>
       <i
@@ -25,7 +25,6 @@
           @input="editTodoTitle"
           @keyup.enter="editTodoComplete"
           :style="itemHeight"
-          autofocus
         />
         <button @click.prevent="removeTodo">
           <i class="fa-solid fa-trash-can"></i>
@@ -54,6 +53,7 @@ export default (
   Vue as MyVueRefs<{
     editInput: HTMLTextAreaElement;
     oneItem: HTMLLIElement;
+    originTitle: HTMLSpanElement;
   }>
 ).extend({
   directives: {
@@ -75,6 +75,7 @@ export default (
       isDragging: false,
       order: [] as Order[],
       originY: 0,
+      scrollHeight: 0,
     };
   },
   computed: {
@@ -82,7 +83,9 @@ export default (
       return this.todoItem.done ? "complete" : null;
     },
     itemHeight(): object {
-      return { height: this.$refs.oneItem.scrollHeight + "px" };
+      return {
+        height: this.scrollHeight + "px",
+      };
     },
     validateTitle(): string {
       return this.todoItem.title.replace(/\s{2,}/gi, " ");
@@ -98,12 +101,16 @@ export default (
     editTodo() {
       this.edit.status = true;
       setTimeout(() => {
-        const textarea = this.$refs.editInput;
-        // textarea.style.height = "auto";
-        textarea.parentElement!.style.height = textarea.scrollHeight + "px";
-        textarea.style.height = textarea.scrollHeight + "px";
-        textarea.focus();
+        this.$refs.editInput.removeAttribute("autofocus");
       }, 100);
+      setTimeout(() => {
+        const textarea = this.$refs.editInput;
+
+        textarea.parentElement!.style.height = this.scrollHeight + "px";
+        textarea.style.height = this.scrollHeight + "px";
+        textarea.setAttribute("autofocus", "autofocus");
+        textarea.focus();
+      }, 200);
     },
     editTodoTitle(event: VueEvent.Input<HTMLInputElement>) {
       if (event.inputType == "insertLineBreak") {
@@ -111,8 +118,11 @@ export default (
       }
       this.edit.title = event.target.value;
       const textarea = this.$refs.editInput;
+
+      textarea.style.height = "auto";
       textarea.parentElement!.style.height = textarea.scrollHeight + "px";
       textarea.style.height = textarea.scrollHeight + "px";
+      this.scrollHeight = textarea.scrollHeight;
       this.$emit("edit", this.todoItem, this.index, this.edit.title);
     },
     editTodoComplete() {
@@ -255,6 +265,11 @@ export default (
         { once: true },
       );
     },
+  },
+  mounted() {
+    this.$nextTick(function () {
+      this.scrollHeight = this.$refs.originTitle.scrollHeight;
+    });
   },
 });
 </script>
