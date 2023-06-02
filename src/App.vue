@@ -43,7 +43,17 @@ const storage = {
     localStorage.setItem(STORAGE_KEY, parsed);
   },
   fetch(): Todo[] {
-    const todoItems = localStorage.getItem(STORAGE_KEY) || "[]";
+    const todoItems =
+      localStorage.getItem(STORAGE_KEY) ||
+      JSON.stringify([
+        { title: "왼쪽 하트버튼을 클릭해보세요", done: false, no: 0 },
+        { title: "글자영역을 클릭하여 내용을 수정하세요", done: false, no: 1 },
+        {
+          title: "오른쪽 Bar 버튼을 위아래로 드래그하여 위치를 변경하세요",
+          done: false,
+          no: 2,
+        },
+      ]);
     const result = JSON.parse(todoItems);
     return result;
   },

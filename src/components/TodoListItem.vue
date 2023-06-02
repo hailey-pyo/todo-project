@@ -8,7 +8,11 @@
       <span class="title" @click="editTodo">
         {{ todoItem.title }}
       </span>
-      <i class="fa-solid fa-bars" @mousedown="mouseDown"></i>
+      <i
+        class="fa-solid fa-bars"
+        @touchstart="touchStart"
+        @mousedown="mouseDown"
+      ></i>
     </span>
 
     <span v-else class="item" v-click-outside="onClickOutside">
@@ -127,25 +131,11 @@ export default (
       this.isDragging = true;
       this.$emit("readyYdata");
 
-      // const throttle = (callback, delay) => {
-      //   let timer;
-      //   return event => {
-      //     // 타이머가 호출되면, 함수를 실행하고 타이머 제거
-      //     if (timer) return;
-      //     timer = setTimeout(() => {
-      //       callback(event);
-      //       timer = null;
-      //     }, delay);
-      //   };
-      // };
-      let prevOriginY = this.originY;
-
       document.addEventListener(
         "mousemove",
         throttle((e: MouseEvent) => {
           if (this.isDragging) {
             if (this.changeStatus.status) {
-              prevOriginY = this.originY;
               console.log("e.clientY: " + e.clientY);
 
               this.$refs.oneItem.style.transform = "translateY(0px)";
@@ -176,11 +166,6 @@ export default (
               // console.log("dy: " + dy);
               //originTop + e.clientY - originY
               //원래위치 + e.clientY - originY
-              console.log(prevOriginY + " / " + this.originY);
-
-              if (prevOriginY == this.originY) {
-                // this.$refs.oneItem.style.transform = "translateY(" + dy + "px)";
-              }
               this.$refs.oneItem.style.transform =
                 "translateY(" + dy / 7 + "px)";
               this.$emit("changeOrder", this.todoItem, e.clientY, this.index);
@@ -191,6 +176,8 @@ export default (
       document.addEventListener(
         "mouseup",
         e => {
+          console.log("마우스뗌");
+
           this.$refs.oneItem.style.boxShadow = "none";
           // this.$refs.oneItem.style.position = "relative";
           // this.$refs.oneItem.style.width = "auto";
@@ -201,19 +188,55 @@ export default (
         },
         { once: true },
       );
-      // document.addEventListener(
-      //   "mouseup",
-      //   e => {
-      //     this.$emit("changeOrder", this.todoItem, e.clientY, this.index);
-      //     this.$refs.oneItem.style.boxShadow = "none";
-      //     // this.$refs.oneItem.style.position = "relative";
-      //     this.$refs.oneItem.style.width = "auto";
-      //     // this.$refs.oneItem.style.top = "auto";
+    },
+    touchStart(e: Touch) {
+      this.originY = e.clientY;
+      console.log("============originY셋팅==========" + this.originY);
 
-      //     this.isDragging = false;
-      //   },
-      //   { once: true },
-      // );
+      this.isDragging = true;
+      this.$emit("readyYdata");
+
+      document.addEventListener(
+        "touchmove",
+        throttle(e => {
+          if (this.isDragging) {
+            if (this.changeStatus.status) {
+              this.$refs.oneItem.style.transform = "translateY(0px)";
+
+              this.originY = e.clientY;
+              console.log("순서변경 완료 originY변경! " + this.originY);
+              this.$emit("resetChangeStatus", false);
+            } else {
+              this.$refs.oneItem.style.boxShadow = "1px 1px 10px rgb(2,2,2)";
+
+              const dy =
+                e.clientY <= this.changeStatus.firstYdata - 50 ||
+                e.clientY >= this.changeStatus.lastYdata + 50
+                  ? 0
+                  : e.clientY - this.originY;
+
+              this.$refs.oneItem.style.transform =
+                "translateY(" + dy / 7 + "px)";
+              this.$emit("changeOrder", this.todoItem, e.clientY, this.index);
+            }
+          }
+        }, 100),
+      );
+      document.addEventListener(
+        "touchend",
+        () => {
+          console.log("손가락뗌");
+
+          this.$refs.oneItem.style.boxShadow = "none";
+          // this.$refs.oneItem.style.position = "relative";
+          // this.$refs.oneItem.style.width = "auto";
+          // this.$refs.oneItem.style.top = "auto";
+          this.$refs.oneItem.style.transform = "translateY(0px)";
+
+          this.isDragging = false;
+        },
+        { once: true },
+      );
     },
   },
 });
