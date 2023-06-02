@@ -11,6 +11,7 @@ $font-ko: 'Montserrat', sans-serif;
     box-sizing: border-box;
 }
 body{
+    min-height: 96vh;
     background-color: #222;
     color: $fontColor;
     button{
