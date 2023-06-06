@@ -134,7 +134,7 @@ export default (
     },
     mouseDown(e: MouseEvent) {
       this.originY = window.pageYOffset + e.clientY;
-      console.log("============1111originY셋팅==========" + this.originY);
+      console.log("===========originY셋팅==========" + this.originY);
 
       this.isDragging = true;
       this.$emit("readyYdata");
@@ -144,46 +144,37 @@ export default (
         throttle((e: MouseEvent) => {
           if (this.isDragging) {
             if (this.changeStatus.status) {
-              console.log("e.절대값: " + window.pageYOffset + e.clientY);
-
-              this.$refs.oneItem.style.transform = "translateY(0px)";
-
-              this.originY = window.pageYOffset + e.clientY;
-              console.log("순서변경 완료 originY변경! " + this.originY);
-              this.$emit("resetChangeStatus", false);
+              // this.$refs.oneItem.style.transform = "translateY(0px)";
+              // this.originY = Number(window.pageYOffset + e.clientY);
+              // console.log("순서변경 완료 originY변경! " + this.originY);
+              // this.$emit("resetChangeStatus", false);
             } else {
-              // console.log("originY: " + this.originY);
-
-              // const nextItem = this.$refs.oneItem.nextSibling as HTMLLIElement;
-              // console.log(nextItem.offsetTop);
-
-              // this.$refs.oneItem.style.position = "absolute";
               this.$refs.oneItem.style.boxShadow = "1px 1px 10px rgb(2,2,2)";
-              // this.$refs.oneItem.style.width = "320px";
-              // this.$refs.oneItem.style.top = originTop + e.clientY - originY + "px";
+              this.$refs.oneItem.style.backgroundColor = "#333";
+              this.$refs.oneItem.style.zIndex = "1";
 
-              //322로 돌아와야하는뎅
-              //331 296 만약 바뀌면 transform 0 & 현재 originY = e.clientY
-              const dy =
-                window.pageYOffset + e.clientY <=
-                  this.changeStatus.firstYdata - 50 ||
-                window.pageYOffset + e.clientY >=
-                  this.changeStatus.lastYdata + 50
-                  ? 0
-                  : window.pageYOffset + e.clientY - this.originY;
-              // console.log(e.clientY <= this.changeStatus.firstYdata - 50);
-              // console.log(e.clientY >= this.changeStatus.lastYdata + 50);
-              // console.log("dy: " + dy);
-              //originTop + e.clientY - originY
-              //원래위치 + e.clientY - originY
-              this.$refs.oneItem.style.transform =
-                "translateY(" + dy / 7 + "px)";
               this.$emit(
                 "changeOrder",
                 this.todoItem,
-                window.pageYOffset + e.clientY,
+                Number(window.pageYOffset + e.clientY),
                 this.index,
               );
+
+              if (this.changeStatus.status) {
+                this.$refs.oneItem.style.transform = "translateY(0px)";
+                this.originY = Number(window.pageYOffset + e.clientY);
+                console.log("순서변경 완료 originY변경! " + this.originY);
+                this.$emit("resetChangeStatus", false);
+              } else {
+                const dy =
+                  Number(window.pageYOffset + e.clientY) <=
+                    this.changeStatus.firstYdata - 50 ||
+                  Number(window.pageYOffset + e.clientY) >=
+                    this.changeStatus.lastYdata + 50
+                    ? 0
+                    : Number(window.pageYOffset + e.clientY) - this.originY;
+                this.$refs.oneItem.style.transform = "translateY(" + dy + "px)";
+              }
             }
           }
         }, 100),
@@ -192,13 +183,10 @@ export default (
         "mouseup",
         e => {
           console.log("마우스뗌");
-
           this.$refs.oneItem.style.boxShadow = "none";
-          // this.$refs.oneItem.style.position = "relative";
-          // this.$refs.oneItem.style.width = "auto";
-          // this.$refs.oneItem.style.top = "auto";
+          this.$refs.oneItem.style.backgroundColor = "transparent";
+          this.$refs.oneItem.style.zIndex = "0";
           this.$refs.oneItem.style.transform = "translateY(0px)";
-
           this.isDragging = false;
         },
         { once: true },
@@ -206,8 +194,9 @@ export default (
     },
     touchStart(e: TouchEvent) {
       e.preventDefault();
-      this.originY =
-        window.pageYOffset + Math.round(e.targetTouches[0].clientY);
+      this.originY = Number(
+        window.pageYOffset + Math.round(e.targetTouches[0].clientY),
+      );
       console.log("============originY셋팅==========" + this.originY);
 
       this.isDragging = true;
@@ -218,33 +207,48 @@ export default (
         throttle(e => {
           if (this.isDragging) {
             if (this.changeStatus.status) {
-              this.$refs.oneItem.style.transform = "translateY(0px)";
-
-              this.originY =
-                window.pageYOffset + Math.round(e.targetTouches[0].clientY);
-              console.log("순서변경 완료 originY변경! " + this.originY);
-              this.$emit("resetChangeStatus", false);
+              // this.$refs.oneItem.style.transform = "translateY(0px)";
+              // this.originY =
+              //   window.pageYOffset + Math.round(e.targetTouches[0].clientY);
+              // console.log("순서변경 완료 originY변경! " + this.originY);
+              // this.$emit("resetChangeStatus", false);
             } else {
               this.$refs.oneItem.style.boxShadow = "1px 1px 10px rgb(2,2,2)";
+              this.$refs.oneItem.style.backgroundColor = "#333";
+              this.$refs.oneItem.style.zIndex = "1";
 
-              const dy =
-                window.pageYOffset + Math.round(e.targetTouches[0].clientY) <=
-                  this.changeStatus.firstYdata - 50 ||
-                window.pageYOffset + Math.round(e.targetTouches[0].clientY) >=
-                  this.changeStatus.lastYdata + 50
-                  ? 0
-                  : window.pageYOffset +
-                    Math.round(e.targetTouches[0].clientY) -
-                    this.originY;
-
-              this.$refs.oneItem.style.transform =
-                "translateY(" + dy / 7 + "px)";
               this.$emit(
                 "changeOrder",
                 this.todoItem,
-                window.pageYOffset + Math.round(e.targetTouches[0].clientY),
+                Number(
+                  window.pageYOffset + Math.round(e.targetTouches[0].clientY),
+                ),
                 this.index,
               );
+              if (this.changeStatus.status) {
+                this.$refs.oneItem.style.transform = "translateY(0px)";
+                this.originY = Number(
+                  window.pageYOffset + Math.round(e.targetTouches[0].clientY),
+                );
+                console.log("순서변경 완료 originY변경! " + this.originY);
+                this.$emit("resetChangeStatus", false);
+              } else {
+                const dy =
+                  Number(
+                    window.pageYOffset + Math.round(e.targetTouches[0].clientY),
+                  ) <=
+                    this.changeStatus.firstYdata - 50 ||
+                  Number(
+                    window.pageYOffset + Math.round(e.targetTouches[0].clientY),
+                  ) >=
+                    this.changeStatus.lastYdata + 50
+                    ? 0
+                    : Number(
+                        window.pageYOffset +
+                          Math.round(e.targetTouches[0].clientY),
+                      ) - this.originY;
+                this.$refs.oneItem.style.transform = "translateY(" + dy + "px)";
+              }
             }
           }
         }, 100),
@@ -255,11 +259,9 @@ export default (
           console.log("손가락뗌");
 
           this.$refs.oneItem.style.boxShadow = "none";
-          // this.$refs.oneItem.style.position = "relative";
-          // this.$refs.oneItem.style.width = "auto";
-          // this.$refs.oneItem.style.top = "auto";
+          this.$refs.oneItem.style.backgroundColor = "transparent";
+          this.$refs.oneItem.style.zIndex = "0";
           this.$refs.oneItem.style.transform = "translateY(0px)";
-
           this.isDragging = false;
         },
         { once: true },
